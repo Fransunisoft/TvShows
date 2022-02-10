@@ -11,7 +11,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.fransunisoft.tvshow.models.MovieData
 import com.fransunisoft.tvshows.R
 
-class MoviesAdapter(private var movieData: List<MovieData>) :
+class MoviesAdapter(private var movieData: MutableList<MovieData>) :
     RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
@@ -26,9 +26,18 @@ class MoviesAdapter(private var movieData: List<MovieData>) :
 
     override fun getItemCount(): Int = movieData.size
 
-    fun updateMovie(movieData: List<MovieData>) {
-        this.movieData = movieData
-        notifyDataSetChanged()
+
+//    fun updateMovie(movieData: List<MovieData>){
+//        this.movieData = movieData
+//        notifyDataSetChanged()
+//    }
+
+    fun appendMovies(movieData: List<MovieData>) {
+        this.movieData.addAll(movieData)
+        notifyItemRangeInserted(
+            this.movieData.size,
+            movieData.size - 1
+        )
     }
 
     inner class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -14,30 +14,56 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MoviesAdapter
+    private lateinit var layoutManager: LinearLayoutManager
+
+    private var moviePage = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         recyclerView = findViewById(R.id.top_rated_movies)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
-        adapter = MoviesAdapter(listOf())
+        recyclerView.layoutManager = layoutManager
+        adapter = MoviesAdapter((mutableListOf()))
         recyclerView.adapter = adapter
 
+        getTopRated()
+    }
+
+    private fun getTopRated() {
         MoviesRepository.getTopRatedMovies(
+            moviePage,
             onSuccess = ::fetchMovies,
             onError = ::onError
         )
     }
 
+    private fun topRatedScrollListener() {
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val totalItemCount = layoutManager.itemCount
+                val visibleItemCount = layoutManager.childCount
+                val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
+
+                if (firstVisibleItem + visibleItemCount >= totalItemCount / 2) {
+                    recyclerView.removeOnScrollListener(this)
+                    moviePage++
+                    getTopRated()
+                }
+            }
+        })
+    }
+
     private fun fetchMovies(movieData: List<MovieData>) {
-        adapter.updateMovie(movieData)
+        adapter.appendMovies(movieData)
+        topRatedScrollListener()
         Log.i("MainActivity", "movieData${movieData}")
     }
 
     private fun onError() {
-        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
+
     }
 
 }
