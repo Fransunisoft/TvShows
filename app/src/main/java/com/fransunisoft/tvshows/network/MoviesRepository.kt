@@ -1,6 +1,5 @@
 package com.fransunisoft.tvshows.network
 
-import android.util.Log
 import com.fransunisoft.tvshow.models.GetMovieResponse
 import com.fransunisoft.tvshow.models.MovieData
 import com.fransunisoft.tvshow.network.Api
@@ -25,6 +24,8 @@ object MoviesRepository {
 
     fun getTopRatedMovies(
         page: Int = 1,
+        onSuccess: (movies: List<MovieData>) -> Unit,
+        onError: () -> Unit,
     ) {
         api.getTopRated(page = page)
             .enqueue(object : Callback<GetMovieResponse> {
@@ -36,15 +37,16 @@ object MoviesRepository {
                         val responseBody = response.body()
 
                         if (responseBody != null) {
-                            Log.d("Repository", "Movies: ${responseBody.movies}")
+                            onSuccess.invoke(responseBody.movies)
                         } else {
-                            Log.d("Repository", "Failed to get response")
+                            onError.invoke()
                         }
+                    } else {
+                        onError.invoke()
                     }
                 }
-
                 override fun onFailure(call: Call<GetMovieResponse>, t: Throwable) {
-                    Log.e("Repository", "onFailure", t)
+                    onError.invoke()
                 }
 
             })
